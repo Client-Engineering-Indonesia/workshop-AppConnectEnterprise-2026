@@ -520,6 +520,40 @@ Create a `.gitignore` file in your project root to exclude unnecessary files:
 
 ### Common Issues and Solutions
 
+**Issue: HTTP 400 Error - Large File Push Failed**
+- **Symptom**:
+  ```
+  error: RPC failed; HTTP 400 curl 22 The requested URL returned error: 400
+  send-pack: unexpected disconnect while reading sideband packet
+  Writing objects: 100% (150/150), 41.05 MiB | 24.60 MiB/s, done.
+  fatal: the remote end hung up unexpectedly
+  ```
+- **Cause**: Pushing large files (especially .bar files) exceeds GitLab's HTTP request size limit
+- **Solutions**:
+  1. **Add .bar files to .gitignore** (recommended):
+     ```bash
+     echo "*.bar" >> .gitignore
+     git add .gitignore
+     git commit -m "Ignore BAR files"
+     ```
+  2. **Remove .bar files from Git history**:
+     ```bash
+     git rm --cached *.bar
+     git commit -m "Remove BAR files from repository"
+     git push
+     ```
+  3. **Increase Git buffer size** (temporary fix):
+     ```bash
+     git config http.postBuffer 524288000
+     git push
+     ```
+  4. **Use SSH instead of HTTPS** (better for large files):
+     - Configure SSH key in GitLab
+     - Change remote URL to SSH
+     - Push again
+
+**Best Practice**: BAR files are compiled artifacts and should NOT be committed to Git. They should be generated during CI/CD builds, not stored in version control.
+
 **Issue: Authentication Failed**
 - **Symptom**: "Authentication failed" when pushing to GitLab
 - **Solutions**:
